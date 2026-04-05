@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoStudyBuddy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f11; color: #e8e8ec; min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; font-weight: 600; color: #fff; margin-bottom: 0.25rem; }
+  .sub { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+  textarea { width: 100%; min-height: 120px; resize: vertical; border: 1px solid #2a2a30; border-radius: 12px; padding: 14px; font-size: 15px; line-height: 1.5; font-family: inherit; color: #e8e8ec; background: #18181c; transition: border-color 0.15s; }
+  textarea:focus { outline: none; border-color: #5558ef; }
+  textarea::placeholder { color: #444; }
+  .hint-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+  .hint { font-size: 12px; color: #444; }
+  .free-counter { font-size: 12px; color: #555; }
+  .free-counter span { color: #8b8fff; }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .go-btn { flex: 1; padding: 13px; font-size: 15px; font-weight: 500; border: 1px solid #5558ef; border-radius: 12px; background: #1a1a2e; color: #8b8fff; cursor: pointer; transition: all 0.15s; }
+  .go-btn:hover { background: #22224a; }
+  .go-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .clear-btn { padding: 13px 18px; font-size: 14px; border: 1px solid #2a2a30; border-radius: 12px; background: transparent; color: #555; cursor: pointer; transition: all 0.15s; }
+  .clear-btn:hover { color: #999; border-color: #444; }
+  .answers { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 12px; }
+  .answer-block { background: #18181c; border: 1px solid #2a2a30; border-radius: 14px; padding: 18px 20px; }
+  .q-label { font-size: 12px; color: #555; margin-bottom: 6px; }
+  .answer-text { font-size: 17px; font-weight: 500; color: #fff; line-height: 1.5; margin-bottom: 10px; }
+  .explain-text { font-size: 14px; color: #999; line-height: 1.7; border-top: 1px solid #1e1e22; padding-top: 10px; }
+  .answer-text:last-child { margin-bottom: 0; }
+  .add-more-bar { margin-top: 1.2rem; border: 1px dashed #2a2a30; border-radius: 12px; overflow: hidden; }
+  .add-more-btn { width: 100%; padding: 13px; font-size: 14px; color: #666; background: transparent; border: none; cursor: pointer; transition: all 0.15s; }
+  .add-more-btn:hover { color: #aaa; background: #18181c; }
+  .add-more-inner { display: none; padding: 12px; border-top: 1px dashed #2a2a30; }
+  .add-more-inner.open { display: block; }
+  .add-more-inner textarea { min-height: 90px; }
+  .add-more-inner .go-btn { margin-top: 8px; width: 100%; }
+  .paywall { margin-top: 1.2rem; background: #18181c; border: 1px solid #3d3520; border-radius: 14px; padding: 20px 22px; }
+  .paywall-title { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 6px; }
+  .paywall-sub { font-size: 13px; color: #666; margin-bottom: 14px; line-height: 1.6; }
+  .paywall-sub a { color: #8b8fff; text-decoration: none; }
+  .paywall-sub a:hover { text-decoration: underline; }
+  .paywall input { width: 100%; background: #0f0f11; border: 1px solid #2a2a30; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #ccc; font-family: monospace; margin-bottom: 10px; }
+  .paywall input:focus { outline: none; border-color: #5558ef; }
+  .paywall-btn { width: 100%; padding: 11px; font-size: 14px; font-weight: 500; border: 1px solid #5558ef; border-radius: 10px; background: #1a1a2e; color: #8b8fff; cursor: pointer; transition: all 0.15s; }
+  .paywall-btn:hover { background: #22224a; }
+  .hidden { display: none; }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #5558ef44; border-top-color: #5558ef; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-text { color: #F0997B; font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>NoStudyBuddy</h1>
+  <p class="sub">Paste your quiz questions — get the answers instantly.</p>
+  <textarea id="question" placeholder="Paste your quiz question(s) here..."></textarea>
+  <div class="hint-row">
+    <span class="hint">Press Enter to submit · Shift+Enter for new line</span>
+    <span class="free-counter" id="counter"><span id="count-num">5</span> free answers left</span>
+  </div>
+  <div class="btn-row">
+    <button class="go-btn" id="goBtn" onclick="solve(document.getElementById('question'), document.getElementById('goBtn'))">Get answers →</button>
+    <button class="clear-btn" onclick="clearAll()">Clear all</button>
+  </div>
+  <div id="answers" class="answers hidden"></div>
+  <div id="paywall" class="paywall hidden">
+    <div class="paywall-title">You've used your 5 free answers</div>
+    <div class="paywall-sub">Add your own Anthropic API key to keep going — it costs fractions of a penny per question. Get one free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.</div>
+    <input type="password" id="userKey" placeholder="sk-ant-..." />
+    <button class="paywall-btn" onclick="activateKey()">Unlock unlimited answers →</button>
+  </div>
+  <div id="add-more-bar" class="add-more-bar hidden">
+    <button class="add-more-btn" onclick="toggleAddMore()">+ Add more questions</button>
+    <div class="add-more-inner" id="add-more-inner">
+      <textarea id="more-question" placeholder="Paste more questions here..."></textarea>
+      <button class="go-btn" id="moreBtn" onclick="solve(document.getElementById('more-question'), document.getElementById('moreBtn'), true)">Get answers →</button>
+    </div>
+  </div>
+</div>
+<script>
+const FREE_LIMIT = 5;
+let questionsUsed = 0;
+let userApiKey = null;
+let addMoreOpen = false;
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('question').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); solve(this, document.getElementById('goBtn')); }
+  });
+  document.getElementById('more-question').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); solve(this, document.getElementById('moreBtn'), true); }
+  });
+});
+function updateCounter() {
+  const remaining = Math.max(0, FREE_LIMIT - questionsUsed);
+  const el = document.getElementById('counter');
+  if (userApiKey) {
+    el.innerHTML = '<span style="color:#5DCAA5">✓ Using your API key</span>';
+  } else {
+    document.getElementById('count-num').textContent = remaining;
+  }
+}
+function activateKey() {
+  const key = document.getElementById('userKey').value.trim();
+  if (!key.startsWith('sk-ant-')) return alert('That doesn\'t look like a valid Anthropic key.');
+  userApiKey = key;
+  document.getElementById('paywall').classList.add('hidden');
+  document.getElementById('goBtn').disabled = false;
+  updateCounter();
+  document.getElementById('question').focus();
+}
+function toggleAddMore() {
+  addMoreOpen = !addMoreOpen;
+  document.getElementById('add-more-inner').classList.toggle('open', addMoreOpen);
+  document.querySelector('.add-more-btn').textContent = addMoreOpen ? '− Close' : '+ Add more questions';
+  if (addMoreOpen) document.getElementById('more-question').focus();
+}
+function clearAll() {
+  document.getElementById('question').value = '';
+  document.getElementById('answers').innerHTML = '';
+  document.getElementById('answers').classList.add('hidden');
+  document.getElementById('add-more-bar').classList.add('hidden');
+  document.getElementById('more-question').value = '';
+  document.getElementById('add-more-inner').classList.remove('open');
+  addMoreOpen = false;
+  document.querySelector('.add-more-btn').textContent = '+ Add more questions';
+}
+async function solve(textareaEl, btnEl, isMore) {
+  const q = textareaEl.value.trim();
+  if (!q) return alert('Please enter a question.');
+  if (!userApiKey && questionsUsed >= FREE_LIMIT) {
+    document.getElementById('paywall').classList.remove('hidden');
+    document.getElementById('goBtn').disabled = true;
+    return;
+  }
+  btnEl.disabled = true;
+  btnEl.innerHTML = '<span class="spinner"></span>Thinking...';
+  const answersEl = document.getElementById('answers');
+  answersEl.classList.remove('hidden');
+  if (isMore) {
+    const divider = document.createElement('div');
+    divider.style.cssText = 'border-top: 1px solid #1e1e22; margin: 4px 0;';
+    answersEl.appendChild(divider);
+  }
+  try {
+    const body = { question: q };
+    if (userApiKey) body.userKey = userApiKey;
+    const res = await fetch('/api/solve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    const items = data.answers;
+    items.forEach((item, i) => {
+      const block = document.createElement('div');
+      block.className = 'answer-block';
+      block.innerHTML = `
+        ${items.length > 1 || isMore ? `<div class="q-label">${item.question || 'Question ' + (i+1)}</div>` : ''}
+        <div class="answer-text">${item.answer || ''}</div>
+        ${item.explanation ? `<div class="explain-text">${item.explanation}</div>` : ''}
+      `;
+      answersEl.appendChild(block);
+    });
+    if (!userApiKey) {
+      questionsUsed++;
+      updateCounter();
+      if (questionsUsed >= FREE_LIMIT) {
+        document.getElementById('paywall').classList.remove('hidden');
+        document.getElementById('goBtn').disabled = true;
+      }
+    }
+    document.getElementById('add-more-bar').classList.remove('hidden');
+    if (isMore) { textareaEl.value = ''; toggleAddMore(); }
+  } catch(err) {
+    const block = document.createElement('div');
+    block.className = 'answer-block';
+    block.innerHTML = `<div class="error-text">Error: ${err.message}</div>`;
+    answersEl.appendChild(block);
+  }
+  btnEl.disabled = false;
+  btnEl.textContent = 'Get answers →';
+}
+</script>
+</body>
+</html>
