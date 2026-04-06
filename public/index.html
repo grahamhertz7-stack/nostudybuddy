@@ -1,188 +1,793 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NoStudyBuddy</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f11; color: #e8e8ec; min-height: 100vh; padding: 2rem 1rem; }
-  .container { max-width: 680px; margin: 0 auto; }
-  h1 { font-size: 1.5rem; font-weight: 600; color: #fff; margin-bottom: 0.25rem; }
-  .sub { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
-  textarea { width: 100%; min-height: 120px; resize: vertical; border: 1px solid #2a2a30; border-radius: 12px; padding: 14px; font-size: 15px; line-height: 1.5; font-family: inherit; color: #e8e8ec; background: #18181c; transition: border-color 0.15s; }
-  textarea:focus { outline: none; border-color: #5558ef; }
-  textarea::placeholder { color: #444; }
-  .hint-row { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
-  .hint { font-size: 12px; color: #444; }
-  .free-counter { font-size: 12px; color: #555; }
-  .free-counter span { color: #8b8fff; }
-  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
-  .go-btn { flex: 1; padding: 13px; font-size: 15px; font-weight: 500; border: 1px solid #5558ef; border-radius: 12px; background: #1a1a2e; color: #8b8fff; cursor: pointer; transition: all 0.15s; }
-  .go-btn:hover { background: #22224a; }
-  .go-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .clear-btn { padding: 13px 18px; font-size: 14px; border: 1px solid #2a2a30; border-radius: 12px; background: transparent; color: #555; cursor: pointer; transition: all 0.15s; }
-  .clear-btn:hover { color: #999; border-color: #444; }
-  .answers { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 12px; }
-  .answer-block { background: #18181c; border: 1px solid #2a2a30; border-radius: 14px; padding: 18px 20px; }
-  .q-label { font-size: 12px; color: #555; margin-bottom: 6px; }
-  .answer-text { font-size: 17px; font-weight: 500; color: #fff; line-height: 1.5; margin-bottom: 10px; }
-  .explain-text { font-size: 14px; color: #999; line-height: 1.7; border-top: 1px solid #1e1e22; padding-top: 10px; }
-  .answer-text:last-child { margin-bottom: 0; }
-  .add-more-bar { margin-top: 1.2rem; border: 1px dashed #2a2a30; border-radius: 12px; overflow: hidden; }
-  .add-more-btn { width: 100%; padding: 13px; font-size: 14px; color: #666; background: transparent; border: none; cursor: pointer; transition: all 0.15s; }
-  .add-more-btn:hover { color: #aaa; background: #18181c; }
-  .add-more-inner { display: none; padding: 12px; border-top: 1px dashed #2a2a30; }
-  .add-more-inner.open { display: block; }
-  .add-more-inner textarea { min-height: 90px; }
-  .add-more-inner .go-btn { margin-top: 8px; width: 100%; }
-  .paywall { margin-top: 1.2rem; background: #18181c; border: 1px solid #3d3520; border-radius: 14px; padding: 20px 22px; }
-  .paywall-title { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 6px; }
-  .paywall-sub { font-size: 13px; color: #666; margin-bottom: 14px; line-height: 1.6; }
-  .paywall-sub a { color: #8b8fff; text-decoration: none; }
-  .paywall-sub a:hover { text-decoration: underline; }
-  .paywall input { width: 100%; background: #0f0f11; border: 1px solid #2a2a30; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #ccc; font-family: monospace; margin-bottom: 10px; }
-  .paywall input:focus { outline: none; border-color: #5558ef; }
-  .paywall-btn { width: 100%; padding: 11px; font-size: 14px; font-weight: 500; border: 1px solid #5558ef; border-radius: 10px; background: #1a1a2e; color: #8b8fff; cursor: pointer; transition: all 0.15s; }
-  .paywall-btn:hover { background: #22224a; }
-  .hidden { display: none; }
-  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #5558ef44; border-top-color: #5558ef; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error-text { color: #F0997B; font-size: 15px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoStudyBuddy</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #0f0f11;
+      color: #e2e2e8;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Layout ── */
+    header {
+      width: 100%;
+      max-width: 860px;
+      padding: 28px 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #5558ef; }
+
+    main {
+      width: 100%;
+      max-width: 860px;
+      padding: 32px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #18181c;
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid #2a2a30;
+    }
+
+    /* ── Auth bar ── */
+    #auth-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    #auth-bar .spacer { flex: 1; }
+    #user-info {
+      font-size: 0.85rem;
+      color: #9999aa;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #user-info img {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary   { background: #5558ef; color: #fff; }
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+    .btn-ghost     { background: transparent; color: #9999aa; border: 1px solid #2a2a30; }
+    .btn-ghost:hover:not(:disabled) { border-color: #5558ef; color: #fff; }
+    .btn-danger    { background: #3a1a1a; color: #f87171; border: 1px solid #5a2020; }
+    .btn-danger:hover:not(:disabled) { background: #4a2020; }
+    .btn-google {
+      background: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    .btn-google:hover { background: #f5f5f5; }
+    .btn-sm { padding: 6px 13px; font-size: 0.8rem; }
+
+    /* ── Input area ── */
+    textarea {
+      width: 100%;
+      background: #0f0f11;
+      border: 1px solid #2a2a30;
+      border-radius: 10px;
+      color: #e2e2e8;
+      font-size: 0.95rem;
+      padding: 14px 16px;
+      resize: vertical;
+      min-height: 110px;
+      font-family: inherit;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    textarea:focus { border-color: #5558ef; }
+    textarea::placeholder { color: #555560; }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ── Image upload ── */
+    #image-preview-wrap {
+      margin-top: 12px;
+      display: none;
+    }
+    #image-preview {
+      max-width: 100%;
+      max-height: 260px;
+      border-radius: 10px;
+      border: 1px solid #2a2a30;
+      object-fit: contain;
+    }
+    .remove-img {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #f87171;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .remove-img:hover { text-decoration: underline; }
+
+    /* ── Free tier counter ── */
+    #free-counter {
+      font-size: 0.8rem;
+      color: #6666aa;
+      margin-left: auto;
+    }
+
+    /* ── Answer cards ── */
+    #results { display: flex; flex-direction: column; gap: 16px; }
+
+    .ai-card { border-radius: 12px; overflow: hidden; }
+    .ai-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .ai-card-body {
+      padding: 16px 18px;
+      font-size: 0.93rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      background: #18181c;
+      border: 1px solid #2a2a30;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* AI brand colours */
+    .ai-claude  .ai-card-header { background: #2a1f3d; color: #c084fc; border: 1px solid #3d2a5a; border-bottom: none; border-radius: 12px 12px 0 0; }
+    .ai-chatgpt .ai-card-header { background: #0d2a1f; color: #34d399; border: 1px solid #1a4a35; border-bottom: none; border-radius: 12px 12px 0 0; }
+    .ai-gemini  .ai-card-header { background: #1a1a2e; color: #60a5fa; border: 1px solid #1e3a5f; border-bottom: none; border-radius: 12px 12px 0 0; }
+    .ai-grok    .ai-card-header { background: #1a1a1a; color: #e2e2e8; border: 1px solid #333; border-bottom: none; border-radius: 12px 12px 0 0; }
+
+    /* Synthesized answer */
+    .synth-card {
+      background: linear-gradient(135deg, #1a1a2e 0%, #18181c 100%);
+      border: 1px solid #5558ef55;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .synth-header {
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #a5b4fc;
+      background: #1e1e3a;
+      border-bottom: 1px solid #5558ef33;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .synth-body {
+      padding: 18px 20px;
+      font-size: 0.97rem;
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid #5558ef44;
+      border-top-color: #5558ef;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: #00000088;
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #18181c;
+      border: 1px solid #2a2a30;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 460px;
+      margin: 16px;
+    }
+    .modal h2 { font-size: 1.1rem; margin-bottom: 6px; }
+    .modal p  { font-size: 0.85rem; color: #9999aa; margin-bottom: 20px; }
+    .modal-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border: 1px solid #2a2a30;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .modal-tab {
+      flex: 1;
+      padding: 9px;
+      background: transparent;
+      border: none;
+      color: #9999aa;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .modal-tab.active { background: #5558ef; color: #fff; }
+    .modal-input {
+      width: 100%;
+      background: #0f0f11;
+      border: 1px solid #2a2a30;
+      border-radius: 8px;
+      color: #e2e2e8;
+      font-size: 0.9rem;
+      padding: 11px 14px;
+      margin-bottom: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .modal-input:focus { border-color: #5558ef; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+    .modal-error { color: #f87171; font-size: 0.82rem; margin-bottom: 10px; min-height: 18px; }
+
+    /* ── Keys modal ── */
+    .key-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .key-row label { font-size: 0.8rem; color: #9999aa; font-weight: 600; letter-spacing: 0.3px; }
+    .key-hint { font-size: 0.75rem; color: #555560; margin-top: 2px; }
+
+    /* ── Paywall ── */
+    #paywall {
+      display: none;
+      text-align: center;
+      padding: 32px 24px;
+    }
+    #paywall h2 { font-size: 1.15rem; margin-bottom: 8px; }
+    #paywall p  { font-size: 0.88rem; color: #9999aa; margin-bottom: 20px; }
+
+    /* ── Misc ── */
+    .divider { height: 1px; background: #2a2a30; margin: 4px 0; }
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: #5558ef22;
+      color: #a5b4fc;
+      letter-spacing: 0.4px;
+    }
+    .error-msg { color: #f87171; font-size: 0.85rem; padding: 10px 0; }
+
+    @media (max-width: 520px) {
+      .input-row { flex-direction: column; }
+      .input-row .btn { width: 100%; justify-content: center; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>NoStudyBuddy</h1>
-  <p class="sub">Paste your quiz questions — get the answers instantly.</p>
-  <textarea id="question" placeholder="Paste your quiz question(s) here..."></textarea>
-  <div class="hint-row">
-    <span class="hint">Press Enter to submit · Shift+Enter for new line</span>
-    <span class="free-counter" id="counter"><span id="count-num">5</span> free answers left</span>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="logo">No<span>Study</span>Buddy</div>
+  <div id="auth-bar">
+    <!-- Shown when logged out -->
+    <div id="logged-out-ui">
+      <button class="btn btn-ghost btn-sm" onclick="openAuthModal()">Sign In</button>
+    </div>
+    <!-- Shown when logged in -->
+    <div id="logged-in-ui" style="display:none; display:flex; align-items:center; gap:10px;">
+      <div id="user-info">
+        <img id="user-avatar" src="" alt="" style="display:none;" />
+        <span id="user-name"></span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="openKeysModal()">🔑 API Keys</button>
+      <button class="btn btn-ghost btn-sm" onclick="signOutUser()">Sign Out</button>
+    </div>
   </div>
-  <div class="btn-row">
-    <button class="go-btn" id="goBtn" onclick="solve(document.getElementById('question'), document.getElementById('goBtn'))">Get answers →</button>
-    <button class="clear-btn" onclick="clearAll()">Clear all</button>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- Input card -->
+  <div class="card">
+    <textarea id="question-input"
+      placeholder="Paste your quiz question here, or upload a photo below…"
+      onkeydown="handleEnter(event)"></textarea>
+
+    <div id="image-preview-wrap">
+      <img id="image-preview" src="" alt="Uploaded quiz" />
+      <br/>
+      <button class="remove-img" onclick="removeImage()">✕ Remove image</button>
+    </div>
+
+    <div class="input-row">
+      <button class="btn btn-primary" id="solve-btn" onclick="solve()">
+        ✦ Solve
+      </button>
+      <label class="btn btn-ghost" style="cursor:pointer;">
+        📷 Upload Photo
+        <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)" />
+      </label>
+      <button class="btn btn-ghost" id="more-btn" style="display:none;" onclick="addMore()">+ Add More</button>
+      <button class="btn btn-ghost" id="clear-btn" style="display:none;" onclick="clearAll()">✕ Clear All</button>
+      <span id="free-counter"></span>
+    </div>
   </div>
-  <div id="answers" class="answers hidden"></div>
-  <div id="paywall" class="paywall hidden">
-    <div class="paywall-title">You've used your 5 free answers</div>
-    <div class="paywall-sub">Add your own Anthropic API key to keep going — it costs fractions of a penny per question. Get one free at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.</div>
-    <input type="password" id="userKey" placeholder="sk-ant-..." />
-    <button class="paywall-btn" onclick="activateKey()">Unlock unlimited answers →</button>
+
+  <!-- Paywall -->
+  <div class="card" id="paywall">
+    <h2>You've used your 5 free answers</h2>
+    <p>Sign in to save your own API keys and keep going — it's free.</p>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="openAuthModal()">Sign In / Sign Up</button>
+    </div>
   </div>
-  <div id="add-more-bar" class="add-more-bar hidden">
-    <button class="add-more-btn" onclick="toggleAddMore()">+ Add more questions</button>
-    <div class="add-more-inner" id="add-more-inner">
-      <textarea id="more-question" placeholder="Paste more questions here..."></textarea>
-      <button class="go-btn" id="moreBtn" onclick="solve(document.getElementById('more-question'), document.getElementById('moreBtn'), true)">Get answers →</button>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     AUTH MODAL
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <h2>Welcome to NoStudyBuddy</h2>
+    <p>Sign in to save your API keys and get unlimited answers.</p>
+
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+      <button class="modal-tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <div id="auth-error" class="modal-error"></div>
+
+    <button class="btn btn-google" style="width:100%; justify-content:center; margin-bottom:16px;" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Continue with Google
+    </button>
+
+    <div style="text-align:center; color:#555560; font-size:0.8rem; margin-bottom:16px;">— or —</div>
+
+    <input class="modal-input" type="email" id="auth-email" placeholder="Email address" />
+    <input class="modal-input" type="password" id="auth-password" placeholder="Password" />
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAuthModal()">Cancel</button>
+      <button class="btn btn-primary" id="auth-submit-btn" onclick="submitAuth()">Sign In</button>
     </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     API KEYS MODAL
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="keys-modal">
+  <div class="modal">
+    <h2>Your API Keys</h2>
+    <p>Keys are saved to your account and never shared. Leave blank to skip that AI.</p>
+
+    <div class="key-row">
+      <label>OPENAI API KEY (ChatGPT)</label>
+      <input class="modal-input" type="password" id="key-openai" placeholder="sk-…" />
+      <div class="key-hint">Get yours at <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#5558ef;">platform.openai.com</a></div>
+    </div>
+    <div class="key-row">
+      <label>GEMINI API KEY</label>
+      <input class="modal-input" type="password" id="key-gemini" placeholder="AIza…" />
+      <div class="key-hint">Get yours at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#5558ef;">aistudio.google.com</a></div>
+    </div>
+    <div class="key-row">
+      <label>GROK API KEY (xAI)</label>
+      <input class="modal-input" type="password" id="key-grok" placeholder="xai-…" />
+      <div class="key-hint">Get yours at <a href="https://console.x.ai/" target="_blank" style="color:#5558ef;">console.x.ai</a></div>
+    </div>
+
+    <div id="keys-error" class="modal-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeKeysModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveKeys()">Save Keys</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     FIREBASE SDK  (v9 compat)
+═══════════════════════════════════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <script>
-const FREE_LIMIT = 5;
-let questionsUsed = 0;
-let userApiKey = null;
-let addMoreOpen = false;
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('question').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); solve(this, document.getElementById('goBtn')); }
-  });
-  document.getElementById('more-question').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); solve(this, document.getElementById('moreBtn'), true); }
-  });
-});
-function updateCounter() {
-  const remaining = Math.max(0, FREE_LIMIT - questionsUsed);
-  const el = document.getElementById('counter');
-  if (userApiKey) {
-    el.innerHTML = '<span style="color:#5DCAA5">✓ Using your API key</span>';
+// ════════════════════════════════════════════════════════════════════════════
+// FIREBASE CONFIG — replace these values with your actual Firebase project config
+// ════════════════════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
+  authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",       // e.g. nostudybuddy.firebaseapp.com
+  projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",        // e.g. nostudybuddy
+  storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",    // e.g. nostudybuddy.appspot.com
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId:             "REPLACE_WITH_YOUR_APP_ID",
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ════════════════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════════════════
+let currentUser   = null;
+let userKeys      = {};          // { openai, gemini, grok }
+let freeAnswers   = parseInt(sessionStorage.getItem("freeAnswers") || "0", 10);
+const FREE_LIMIT  = 5;
+let imageBase64   = null;
+let imageMime     = null;
+let authTabMode   = "signin";
+
+// ════════════════════════════════════════════════════════════════════════════
+// AUTH STATE
+// ════════════════════════════════════════════════════════════════════════════
+auth.onAuthStateChanged(async (user) => {
+  currentUser = user;
+  if (user) {
+    document.getElementById("logged-out-ui").style.display = "none";
+    document.getElementById("logged-in-ui").style.display  = "flex";
+    document.getElementById("user-name").textContent = user.displayName || user.email;
+    if (user.photoURL) {
+      const av = document.getElementById("user-avatar");
+      av.src = user.photoURL;
+      av.style.display = "inline-block";
+    }
+    await loadUserKeys(user.uid);
+    updateFreeCounter();
   } else {
-    document.getElementById('count-num').textContent = remaining;
+    document.getElementById("logged-out-ui").style.display = "block";
+    document.getElementById("logged-in-ui").style.display  = "none";
+    userKeys = {};
+    updateFreeCounter();
+  }
+});
+
+async function loadUserKeys(uid) {
+  try {
+    const doc = await db.collection("userKeys").doc(uid).get();
+    if (doc.exists) userKeys = doc.data() || {};
+  } catch (e) { console.error("loadUserKeys:", e); }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// AUTH MODAL
+// ════════════════════════════════════════════════════════════════════════════
+function openAuthModal()  { document.getElementById("auth-modal").classList.add("open"); }
+function closeAuthModal() { document.getElementById("auth-modal").classList.remove("open"); clearAuthError(); }
+
+function switchTab(mode) {
+  authTabMode = mode;
+  document.getElementById("tab-signin").classList.toggle("active", mode === "signin");
+  document.getElementById("tab-signup").classList.toggle("active", mode === "signup");
+  document.getElementById("auth-submit-btn").textContent = mode === "signin" ? "Sign In" : "Sign Up";
+  clearAuthError();
+}
+
+function clearAuthError() { document.getElementById("auth-error").textContent = ""; }
+function showAuthError(msg) { document.getElementById("auth-error").textContent = msg; }
+
+async function signInWithGoogle() {
+  clearAuthError();
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+    closeAuthModal();
+  } catch (e) { showAuthError(e.message); }
+}
+
+async function submitAuth() {
+  clearAuthError();
+  const email    = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+  if (!email || !password) { showAuthError("Please enter email and password."); return; }
+  try {
+    if (authTabMode === "signin") {
+      await auth.signInWithEmailAndPassword(email, password);
+    } else {
+      await auth.createUserWithEmailAndPassword(email, password);
+    }
+    closeAuthModal();
+  } catch (e) { showAuthError(e.message); }
+}
+
+async function signOutUser() {
+  await auth.signOut();
+  userKeys = {};
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// KEYS MODAL
+// ════════════════════════════════════════════════════════════════════════════
+function openKeysModal() {
+  document.getElementById("key-openai").value = userKeys.openai || "";
+  document.getElementById("key-gemini").value = userKeys.gemini || "";
+  document.getElementById("key-grok").value   = userKeys.grok   || "";
+  document.getElementById("keys-modal").classList.add("open");
+}
+function closeKeysModal() { document.getElementById("keys-modal").classList.remove("open"); }
+
+async function saveKeys() {
+  if (!currentUser) return;
+  const keys = {
+    openai: document.getElementById("key-openai").value.trim(),
+    gemini: document.getElementById("key-gemini").value.trim(),
+    grok:   document.getElementById("key-grok").value.trim(),
+  };
+  try {
+    await db.collection("userKeys").doc(currentUser.uid).set(keys, { merge: true });
+    userKeys = keys;
+    closeKeysModal();
+  } catch (e) {
+    document.getElementById("keys-error").textContent = e.message;
   }
 }
-function activateKey() {
-  const key = document.getElementById('userKey').value.trim();
-  if (!key.startsWith('sk-ant-')) return alert('That doesn\'t look like a valid Anthropic key.');
-  userApiKey = key;
-  document.getElementById('paywall').classList.add('hidden');
-  document.getElementById('goBtn').disabled = false;
-  updateCounter();
-  document.getElementById('question').focus();
-}
-function toggleAddMore() {
-  addMoreOpen = !addMoreOpen;
-  document.getElementById('add-more-inner').classList.toggle('open', addMoreOpen);
-  document.querySelector('.add-more-btn').textContent = addMoreOpen ? '− Close' : '+ Add more questions';
-  if (addMoreOpen) document.getElementById('more-question').focus();
-}
-function clearAll() {
-  document.getElementById('question').value = '';
-  document.getElementById('answers').innerHTML = '';
-  document.getElementById('answers').classList.add('hidden');
-  document.getElementById('add-more-bar').classList.add('hidden');
-  document.getElementById('more-question').value = '';
-  document.getElementById('add-more-inner').classList.remove('open');
-  addMoreOpen = false;
-  document.querySelector('.add-more-btn').textContent = '+ Add more questions';
-}
-async function solve(textareaEl, btnEl, isMore) {
-  const q = textareaEl.value.trim();
-  if (!q) return alert('Please enter a question.');
-  if (!userApiKey && questionsUsed >= FREE_LIMIT) {
-    document.getElementById('paywall').classList.remove('hidden');
-    document.getElementById('goBtn').disabled = true;
+
+// ════════════════════════════════════════════════════════════════════════════
+// FREE TIER COUNTER
+// ════════════════════════════════════════════════════════════════════════════
+function updateFreeCounter() {
+  const el = document.getElementById("free-counter");
+  if (currentUser) {
+    el.textContent = "";
+    document.getElementById("paywall").style.display = "none";
     return;
   }
-  btnEl.disabled = true;
-  btnEl.innerHTML = '<span class="spinner"></span>Thinking...';
-  const answersEl = document.getElementById('answers');
-  answersEl.classList.remove('hidden');
-  if (isMore) {
-    const divider = document.createElement('div');
-    divider.style.cssText = 'border-top: 1px solid #1e1e22; margin: 4px 0;';
-    answersEl.appendChild(divider);
+  const remaining = FREE_LIMIT - freeAnswers;
+  el.textContent = remaining > 0 ? `${remaining} free answer${remaining !== 1 ? "s" : ""} left` : "";
+}
+
+function incrementFreeCount() {
+  if (!currentUser) {
+    freeAnswers++;
+    sessionStorage.setItem("freeAnswers", freeAnswers);
+    updateFreeCounter();
   }
+}
+
+function isPaywalled() {
+  return !currentUser && freeAnswers >= FREE_LIMIT;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// IMAGE HANDLING
+// ════════════════════════════════════════════════════════════════════════════
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  imageMime = file.type;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    imageBase64 = dataUrl.split(",")[1];
+    document.getElementById("image-preview").src = dataUrl;
+    document.getElementById("image-preview-wrap").style.display = "block";
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  imageBase64 = null;
+  imageMime   = null;
+  document.getElementById("image-input").value = "";
+  document.getElementById("image-preview-wrap").style.display = "none";
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUT
+// ════════════════════════════════════════════════════════════════════════════
+function handleEnter(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); solve(); }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SOLVE
+// ════════════════════════════════════════════════════════════════════════════
+async function solve() {
+  const question = document.getElementById("question-input").value.trim();
+  if (!question && !imageBase64) return;
+
+  if (isPaywalled()) {
+    document.getElementById("paywall").style.display = "block";
+    document.getElementById("paywall").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  const btn = document.getElementById("solve-btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Solving…';
+
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("paywall").style.display = "none";
+
   try {
-    const body = { question: q };
-    if (userApiKey) body.userKey = userApiKey;
-    const res = await fetch('/api/solve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+    const payload = {
+      question,
+      imageBase64,
+      imageMime,
+      userKeys: currentUser ? {
+        openai: userKeys.openai || "",
+        gemini: userKeys.gemini || "",
+        grok:   userKeys.grok   || "",
+      } : {},
+    };
+
+    const res  = await fetch("/api/solve", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(payload),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Server error');
-    const items = data.answers;
-    items.forEach((item, i) => {
-      const block = document.createElement('div');
-      block.className = 'answer-block';
-      block.innerHTML = `
-        ${items.length > 1 || isMore ? `<div class="q-label">${item.question || 'Question ' + (i+1)}</div>` : ''}
-        <div class="answer-text">${item.answer || ''}</div>
-        ${item.explanation ? `<div class="explain-text">${item.explanation}</div>` : ''}
-      `;
-      answersEl.appendChild(block);
-    });
-    if (!userApiKey) {
-      questionsUsed++;
-      updateCounter();
-      if (questionsUsed >= FREE_LIMIT) {
-        document.getElementById('paywall').classList.remove('hidden');
-        document.getElementById('goBtn').disabled = true;
-      }
+
+    if (!res.ok) {
+      renderError(data.error || "Something went wrong.");
+      return;
     }
-    document.getElementById('add-more-bar').classList.remove('hidden');
-    if (isMore) { textareaEl.value = ''; toggleAddMore(); }
-  } catch(err) {
-    const block = document.createElement('div');
-    block.className = 'answer-block';
-    block.innerHTML = `<div class="error-text">Error: ${err.message}</div>`;
-    answersEl.appendChild(block);
+
+    renderResults(data);
+    incrementFreeCount();
+
+    // Show action buttons
+    document.getElementById("more-btn").style.display  = "inline-flex";
+    document.getElementById("clear-btn").style.display = "inline-flex";
+
+  } catch (err) {
+    renderError("Network error: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "✦ Solve";
   }
-  btnEl.disabled = false;
-  btnEl.textContent = 'Get answers →';
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════════════════════
+const AI_META = {
+  Claude:  { cls: "ai-claude",  icon: "◆", label: "Claude (Anthropic)" },
+  ChatGPT: { cls: "ai-chatgpt", icon: "◉", label: "ChatGPT (OpenAI)" },
+  Gemini:  { cls: "ai-gemini",  icon: "✦", label: "Gemini (Google)" },
+  Grok:    { cls: "ai-grok",    icon: "✕", label: "Grok (xAI)" },
+};
+
+function renderResults({ answers, synthesized, errors }) {
+  const container = document.getElementById("results");
+  container.innerHTML = "";
+
+  // Synthesized answer first (most prominent)
+  if (synthesized) {
+    const s = document.createElement("div");
+    s.className = "synth-card";
+    s.innerHTML = `
+      <div class="synth-header">⚡ Best Answer <span class="tag">Synthesized</span></div>
+      <div class="synth-body">${escHtml(synthesized)}</div>`;
+    container.appendChild(s);
+  }
+
+  // Individual AI answers
+  for (const [name, text] of Object.entries(answers || {})) {
+    const meta = AI_META[name] || { cls: "", icon: "●", label: name };
+    const card = document.createElement("div");
+    card.className = `ai-card ${meta.cls}`;
+    card.innerHTML = `
+      <div class="ai-card-header">${meta.icon} ${meta.label}</div>
+      <div class="ai-card-body">${escHtml(text)}</div>`;
+    container.appendChild(card);
+  }
+
+  // Errors (non-fatal)
+  if (errors && Object.keys(errors).length > 0) {
+    const errDiv = document.createElement("div");
+    errDiv.className = "error-msg";
+    errDiv.textContent = "Some AIs were unavailable: " + Object.keys(errors).join(", ");
+    container.appendChild(errDiv);
+  }
+
+  container.scrollIntoView({ behavior: "smooth" });
+}
+
+function renderError(msg) {
+  document.getElementById("results").innerHTML =
+    `<div class="card error-msg">${escHtml(msg)}</div>`;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// UTILITY BUTTONS
+// ════════════════════════════════════════════════════════════════════════════
+function addMore() {
+  document.getElementById("question-input").value = "";
+  removeImage();
+  document.getElementById("question-input").focus();
+  document.getElementById("more-btn").style.display  = "none";
+  document.getElementById("clear-btn").style.display = "none";
+}
+
+function clearAll() {
+  document.getElementById("question-input").value = "";
+  removeImage();
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("more-btn").style.display  = "none";
+  document.getElementById("clear-btn").style.display = "none";
+}
+
+// Init counter on load
+updateFreeCounter();
 </script>
 </body>
 </html>
